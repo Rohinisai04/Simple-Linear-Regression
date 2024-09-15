@@ -1,0 +1,106 @@
+import numpy as np
+
+# Data
+x = np.array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
+y = np.array([1, 3, 2, 5, 7, 8, 8, 9, 10, 12])
+
+# Analytic Solution for Linear Regression
+x_mean = np.mean(x)
+y_mean = np.mean(y)
+
+# Compute coefficients
+numerator = np.sum((x - x_mean) * (y - y_mean))
+denominator = np.sum((x - x_mean) ** 2)
+beta1 = numerator / denominator
+beta0 = y_mean - beta1 * x_mean
+
+# Predicted values
+y_pred = beta0 + beta1 * x
+
+# Sum of Squared Errors (SSE) and R^2 value
+sse = np.sum((y - y_pred) ** 2)
+sst = np.sum((y - y_mean) ** 2)
+r_squared = 1 - (sse / sst)
+
+# Output results for analytic solution
+print(f"Analytic Solution Intercept (beta0): {beta0}")
+print(f"Analytic Solution Slope (beta1): {beta1}")
+print(f"Analytic Solution SSE: {sse}")
+print(f"Analytic Solution R^2: {r_squared}")
+
+# Full-Batch Gradient Descent for Linear Regression
+def gradient_descent_full_batch(x, y, alpha=0.01, epochs=1000, tolerance=1e-6):
+    n = len(x)
+    beta0 = beta1 = 0  # Initialize coefficients
+    prev_sse = float('inf')
+
+    for epoch in range(epochs):
+        # Predicted values
+        y_pred = beta0 + beta1 * x
+
+        # Compute gradients
+        d_beta0 = -(2/n) * np.sum(y - y_pred)
+        d_beta1 = -(2/n) * np.sum((y - y_pred) * x)
+
+        # Update coefficients
+        beta0 -= alpha * d_beta0
+        beta1 -= alpha * d_beta1
+
+        # Compute current SSE
+        sse = np.sum((y - y_pred) ** 2)
+
+        # Stopping criteria based on SSE change
+        if abs(prev_sse - sse) < tolerance:
+            break
+
+        prev_sse = sse
+
+    return beta0, beta1, sse
+
+# Run full-batch gradient descent
+beta0_gd, beta1_gd, sse_gd = gradient_descent_full_batch(x, y)
+
+# Output results for full-batch gradient descent
+print(f"Full-Batch GD Intercept: {beta0_gd}")
+print(f"Full-Batch GD Slope: {beta1_gd}")
+print(f"Full-Batch GD SSE: {sse_gd}")
+
+# Stochastic Gradient Descent for Linear Regression
+def stochastic_gradient_descent(x, y, alpha=0.01, epochs=1000, tolerance=1e-6):
+    n = len(x)
+    beta0 = beta1 = 0  # Initialize coefficients
+    prev_sse = float('inf')
+
+    for epoch in range(epochs):
+        for i in range(n):
+            # Predicted value for a single data point
+            y_pred_i = beta0 + beta1 * x[i]
+
+            # Compute gradients for this data point
+            d_beta0 = -(2) * (y[i] - y_pred_i)
+            d_beta1 = -(2) * (y[i] - y_pred_i) * x[i]
+
+            # Update coefficients
+            beta0 -= alpha * d_beta0
+            beta1 -= alpha * d_beta1
+
+        # Calculate SSE for stopping criteria
+        y_pred = beta0 + beta1 * x
+        sse = np.sum((y - y_pred) ** 2)
+
+        # Stopping criteria based on SSE change
+        if abs(prev_sse - sse) < tolerance:
+            break
+
+        prev_sse = sse
+
+    return beta0, beta1, sse
+
+# Run stochastic gradient descent
+beta0_sgd, beta1_sgd, sse_sgd = stochastic_gradient_descent(x, y)
+
+# Output results for stochastic gradient descent
+print(f"SGD Intercept: {beta0_sgd}")
+print(f"SGD Slope: {beta1_sgd}")
+print(f"SGD SSE: {sse_sgd}")
+
